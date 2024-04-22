@@ -18,12 +18,29 @@ conn.commit()
 
 @app.post("/tasks")
 async def create_task(task: Task):
+    """
+    Create a new task.
+
+    Parameters:
+    - task (Task): The task object containing title, description, and completed status.
+
+    Returns:
+    - Task: The created task object.
+    """
+
     c.execute("INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)", (task.title, task.description, task.completed))
     conn.commit()
     return task
 
 @app.get("/tasks")
 async def get_tasks():
+    """
+    Get all tasks.
+
+    Returns:
+    - List[Task]: A list of all task objects.
+    """
+
     c.execute("SELECT * FROM tasks")
     rows = c.fetchall()
     tasks = []
@@ -34,6 +51,19 @@ async def get_tasks():
 
 @app.get("/tasks/{task_id}")
 async def get_task(task_id: int):
+    """
+    Get a task by its ID.
+
+    Parameters:
+    - task_id (int): The ID of the task to retrieve.
+
+    Returns:
+    - Task: The task object corresponding to the given ID.
+
+    Raises:
+    - HTTPException(404): If the task with the given ID is not found.
+    """
+
     c.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
     row = c.fetchone()
     if row:
@@ -43,6 +73,20 @@ async def get_task(task_id: int):
 
 @app.put("/tasks/{task_id}")
 async def update_task(task_id: int, updated_task: Task):
+    """
+    Update a task by its ID.
+
+    Parameters:
+    - task_id (int): The ID of the task to update.
+    - updated_task (Task): The updated task object containing new title, description, and completed status.
+
+    Returns:
+    - Task: The updated task object.
+
+    Raises:
+    - HTTPException(404): If the task with the given ID is not found.
+    """
+
     c.execute("UPDATE tasks SET title=?, description=?, completed=? WHERE id=?", (updated_task.title, updated_task.description, updated_task.completed, task_id))
     conn.commit()
     if c.rowcount > 0:
@@ -52,6 +96,19 @@ async def update_task(task_id: int, updated_task: Task):
 
 @app.delete("/tasks/{task_id}")
 async def delete_task(task_id: int):
+    """
+    Delete a task by its ID.
+
+    Parameters:
+    - task_id (int): The ID of the task to delete.
+
+    Returns:
+    - Dict[str, str]: A message confirming successful deletion.
+
+    Raises:
+    - HTTPException(404): If the task with the given ID is not found.
+    """
+    
     c.execute("DELETE FROM tasks WHERE id=?", (task_id,))
     conn.commit()
     if c.rowcount > 0:
